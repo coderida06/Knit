@@ -44,6 +44,8 @@ python main.py
 
 ---
 
+Knit.exe and catagories.json to be uploaded soon as I'm trying to add as many catagories as I can(i have a python program that create these catagories btw, i dont do it manually), so that the puzzles possibility is endless.
+.
 ## Why?
 
 I love puzzle games, especially NYT Connections, but I wanted something that felt more cozy and offered different ways to play. So I built Knit—a game where every puzzle is another thread waiting to be tied together.
