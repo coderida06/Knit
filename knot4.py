@@ -20,7 +20,6 @@ def show_knot4(app, show_menu):
     max_lives = 5
     tiles = []
     
-    # We define these as empty initially; they are populated in load_new_puzzle()
     PUZZLE = []
     COLOR_LOOKUP = {}
     words_data = []
@@ -33,8 +32,8 @@ def show_knot4(app, show_menu):
     yarn_canvas.place(relx=0, rely=0, relwidth=1, relheight=1)
 
     # --- TOP FRAME for header ---
-    top_frame = ctk.CTkFrame(app, fg_color="transparent", height=80)
-    top_frame.pack(side="top", fill="x", pady=(20, 0))
+    top_frame = ctk.CTkFrame(app, fg_color="transparent", height=60)
+    top_frame.pack(side="top", fill="x", pady=(15, 0))
 
     # Back button on the left
     back_button = ctk.CTkButton(
@@ -82,9 +81,9 @@ def show_knot4(app, show_menu):
     game_frame = ctk.CTkFrame(app, fg_color="transparent")
     game_frame.pack(side="top", fill="both", expand=True)
 
-    # Center the game content
+    # FIXED: Top-align game_content instead of pack(expand=True)
     game_content = ctk.CTkFrame(game_frame, fg_color="transparent")
-    game_content.pack(expand=True)
+    game_content.pack(side="top", pady=(10, 20))
 
     # --- SOLVED CARDS CONTAINER ---
     cards_container = ctk.CTkFrame(game_content, fg_color="transparent")
@@ -145,28 +144,28 @@ def show_knot4(app, show_menu):
         
         card = ctk.CTkFrame(
             cards_container,
-            width=485,
-            height=75,
-            corner_radius=16,
+            width=480,
+            height=58,
+            corner_radius=14,
             fg_color=info["color"],
             border_width=2,
             border_color=info["border"]
         )
         card.pack_propagate(False)
-        card.pack(side="top", pady=3)
+        card.pack(side="top", pady=2)
         
         cat_lbl = ctk.CTkLabel(
             card,
             text=info["connection"].upper(),
-            font=("Segoe UI Bold", 14),
+            font=("Segoe UI Bold", 13),
             text_color=info["text_color"]
         )
-        cat_lbl.pack(side="top", pady=(10, 2))
+        cat_lbl.pack(side="top", pady=(6, 0))
         
         words_lbl = ctk.CTkLabel(
             card,
             text=words_str,
-            font=("Segoe UI Semibold", 13),
+            font=("Segoe UI Semibold", 12),
             text_color=info["text_color"]
         )
         words_lbl.pack(side="top")
@@ -183,7 +182,7 @@ def show_knot4(app, show_menu):
         for index, tile in enumerate(unsolved):
             row = index // 4
             col = index % 4
-            tile.grid(row=row, column=col, padx=6, pady=6)
+            tile.grid(row=row, column=col, padx=4, pady=4)
             
         app.after(60, redraw_yarn_threads)
 
@@ -242,13 +241,11 @@ def show_knot4(app, show_menu):
 
     def reveal_answers_and_show_game_over():
         """Reveals all remaining unsolved categories on the board and shows the game over overlay."""
-        # Reveal all remaining groups
         for group in PUZZLE:
             if group["id"] not in solved_groups:
                 solved_groups.append(group["id"])
                 create_solved_card(group["id"])
 
-        # Mark all tiles as solved and hide them from the grid
         for tile in tiles:
             tile.is_solved = True
             tile.grid_forget()
@@ -259,11 +256,9 @@ def show_knot4(app, show_menu):
 
     def update_lives_display():
         """Update the lives display with hearts."""
-        # Clear existing lives
         for child in lives_container.winfo_children():
             child.destroy()
         
-        # Draw new hearts
         for i in range(max_lives):
             color = "#e27396" if i < lives else "#d4b2c7"
             lbl = ctk.CTkLabel(
@@ -278,14 +273,12 @@ def show_knot4(app, show_menu):
     # SMART HINT SYSTEM
     # --------------------------------------------------
     def give_hint():
-        """Smart contextual hints based on current selection."""
         unsolved = [t for t in tiles if not t.is_solved]
         if not unsolved:
             return
 
         target_tiles = []
 
-        # Strategy 1: User has 1-3 tiles selected -> highlight matching partners
         if 1 <= len(selected_tiles) <= 3:
             selected_group = selected_tiles[0].group_id
             if all(t.group_id == selected_group for t in selected_tiles):
@@ -293,14 +286,12 @@ def show_knot4(app, show_menu):
                 if unselected_partners:
                     target_tiles.append(random.choice(unselected_partners))
 
-        # Strategy 2: Nothing selected or mixed selection -> highlight 2 from same group
         if not target_tiles:
             remaining_groups = list({t.group_id for t in unsolved})
             chosen_group = random.choice(remaining_groups)
             group_members = [t for t in unsolved if t.group_id == chosen_group]
             target_tiles = random.sample(group_members, min(2, len(group_members)))
 
-        # Apply temporary glow
         for tile in target_tiles:
             tile.configure(fg_color="#FFF59D", border_color="#FBC02D")
 
@@ -315,7 +306,6 @@ def show_knot4(app, show_menu):
     # WIN ANIMATION & OVERLAYS
     # --------------------------------------------------
     def trigger_win_animation():
-        """Runs yarn stitch animation across completed board."""
         w = app.winfo_width()
         h = app.winfo_height()
         
@@ -391,7 +381,6 @@ def show_knot4(app, show_menu):
         btn_frame = ctk.CTkFrame(content, fg_color="transparent")
         btn_frame.pack(pady=10)
 
-        # In Game Over, they can "Try Again" on the same puzzle
         restart_btn = ctk.CTkButton(
             btn_frame,
             text="Try Again",
@@ -418,7 +407,7 @@ def show_knot4(app, show_menu):
             text_color="#444444",
             border_width=2,
             border_color="#E7B5C8",
-            command=lambda: overlay.destroy()  # Dismisses overlay so player can inspect the revealed cards
+            command=lambda: overlay.destroy()
         )
         show_answers_btn.pack(side="left", padx=8)
 
@@ -439,32 +428,26 @@ def show_knot4(app, show_menu):
         menu_btn.pack(side="left", padx=8)
 
     def reset_game():
-        """Resets state to play the EXACT SAME puzzle again (used on Game Over)."""
         nonlocal lives, tiles, words_data
         
         lives = max_lives
         selected_tiles.clear()
         solved_groups.clear()
         
-        # Remove overlays
         for child in app.winfo_children():
             if isinstance(child, ctk.CTkFrame) and child not in (top_frame, game_frame, yarn_canvas):
                 child.destroy()
         
-        # Clear cards and grid
         for child in cards_container.winfo_children():
             child.destroy()
         for child in grid_container.winfo_children():
             child.destroy()
 
-        # Clear canvas
         yarn_canvas.delete("all")
         
-        # Re-shuffle existing words & reconstruct tile buttons
         random.shuffle(words_data)
         tiles = [WordTile(grid_container, item["word"], item["group_id"]) for item in words_data]
         
-        # Update display
         update_lives_display()
         update_grid_positions()
 
@@ -476,15 +459,15 @@ def show_knot4(app, show_menu):
             super().__init__(
                 master,
                 text=word,
-                width=120,
-                height=90,
-                corner_radius=18,
+                width=115,       # Slightly reduced width to ensure grid stays within window width
+                height=65,       # Reduced height so 4 rows + solved cards fit comfortably vertically
+                corner_radius=14,
                 fg_color="#FFF8FB",
                 hover_color="#F7DDE8",
                 text_color="#444444",
                 border_width=2,
                 border_color="#E7B5C8",
-                font=("Segoe UI Semibold", 16),
+                font=("Segoe UI Semibold", 14),
                 command=self.clicked
             )
             self.selected = False
@@ -500,7 +483,7 @@ def show_knot4(app, show_menu):
                 selected_tiles.remove(self)
                 self.configure(fg_color="#FFF8FB", text_color="#444444", border_color="#E7B5C8")
             else:
-                if len(selected_tiles) == 4:  # Max 4 tiles for a group
+                if len(selected_tiles) == 4:
                     return
                 self.selected = True
                 selected_tiles.append(self)
@@ -508,63 +491,53 @@ def show_knot4(app, show_menu):
 
             redraw_yarn_threads()
 
-            if len(selected_tiles) == 4:  # Check when 4 tiles are selected (full group)
+            if len(selected_tiles) == 4:
                 check_group()
 
     # --------------------------------------------------
     # NEXT PUZZLE LOGIC (In-Memory Reset)
     # --------------------------------------------------
     def load_new_puzzle():
-        """Generates a completely new random puzzle and reloads the board."""
         nonlocal lives, tiles, words_data, PUZZLE, COLOR_LOOKUP, selected_tiles, solved_groups
 
-        # 1. Reset game state variables
         lives = max_lives
         selected_tiles.clear()
         solved_groups.clear()
 
-        # 2. Clear Overlays (Victory / Game Over Screens)
         for child in app.winfo_children():
             if isinstance(child, ctk.CTkFrame) and child not in (top_frame, game_frame, yarn_canvas):
                 child.destroy()
         
-        # 3. Clear UI layout containers
         for child in cards_container.winfo_children():
             child.destroy()
         for child in grid_container.winfo_children():
             child.destroy()
         
-        # Clear drawing canvas
         yarn_canvas.delete("all")
 
-        # 4. LOAD A FRESH RANDOM PUZZLE
         with open("categories.json", "r", encoding="utf-8") as f:
             categories = json.load(f)
 
-        # Pick 4 random categories
         selected_cats = random.sample(categories, 4)
 
         PALETTE = [
             {"color": "#d8f1c6", "border": "#b8dba2", "text_color": "#334f24"},
             {"color": "#d9c5f5", "border": "#b9a2dc", "text_color": "#3c2957"},
             {"color": "#ccecf2", "border": "#a8d6de", "text_color": "#20464d"},
-            {"color": "#fce4b8", "border": "#f5d08a", "text_color": "#5c4516"}  # New color for 4th group
+            {"color": "#fce4b8", "border": "#f5d08a", "text_color": "#5c4516"}
         ]
 
-        # Rebuild Global PUZZLE
         PUZZLE = []
         for i, category in enumerate(selected_cats):
             PUZZLE.append({
                 "id": i + 1,
                 "connection": category["connection"],
-                "words": random.sample(category["words"], 4),  # 4 words per group
+                "words": random.sample(category["words"], 4),
                 **PALETTE[i]
             })
 
-        # Rebuild COLOR_LOOKUP mapping
         COLOR_LOOKUP = {group["id"]: group for group in PUZZLE}
 
-        # Prepare and shuffle word dataset
         words_data = []
         for group in PUZZLE:
             for word in group["words"]:
@@ -576,20 +549,16 @@ def show_knot4(app, show_menu):
 
         random.shuffle(words_data)
 
-        # 5. Reconstruct Tile Buttons
         tiles = [WordTile(grid_container, item["word"], item["group_id"]) for item in words_data]
 
-        # 6. Push updates to UI 
         update_lives_display()
         update_grid_positions()
 
     # --------------------------------------------------
     # INITIALIZE THE GAME PAGE
     # --------------------------------------------------
-    # Start the very first puzzle dynamically
     load_new_puzzle()
 
-    # Finalize geometric startup details slightly delayed to render properly
     def finish_startup():
         app.update_idletasks()
         update_grid_positions()
