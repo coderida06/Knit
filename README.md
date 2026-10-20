@@ -5,25 +5,25 @@ Knit is my take on the NYT Connections game.
 
 Instead of just one way to play, Knit has **three different game modes**:
 
-- 🟢 **3 Knots** – 3 categories, 3 words each
-- 🟣 **4 Knots** – The classic Connections experience
-- 🔵 **5 Knots** – For when your brain needs a real workout
+-  **3 Knots** – 3 categories, 3 words each
+-  **4 Knots** – The classic Connections experience
+-  **5 Knots** – For when your brain needs a real workout
 
 Connect words you think belong together, tie them into knots, and see if your logic was right. Sounds easy... until it isn't.
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🧶 Three unique game modes
-- 💡 Hint system
-- ❤️ Lives system
-- 🧩 Thousands of handcrafted puzzles
+-  Three unique game modes
+-  Hint system
+-  Lives system
+-  Thousands of handcrafted puzzles
 
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ```bash
 git clone https://github.com/coderida06/Knit.git
@@ -34,13 +34,13 @@ python main.py
 
 ---
 
-## 🛠 Built With
+##  Built With
 
 - Python
 - CustomTkinter
 - Pillow
 - SQLite
-- A lot of coffee ☕
+- A lot of coffee 
 
 ---
 
